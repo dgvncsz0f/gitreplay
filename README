@@ -1,0 +1,41 @@
+We used to use git-svn and we were happy ... until we figure that
+merges are not that easy. There are some alternatives for solving this
+however none of them was satisfactory [using format-patch, rebase or
+cherry-pick].
+
+This project started with the idea of parsing the log history and
+replaying operations. One of the targets would be SVN. However, at
+some point, there was the idea to use a /second/ git repository to
+deal with updates and this, apparently, works better.
+
+The whole thing is supposed to work like this:
+
+    1. user setup a git repository: git --bare init (GIT_REMOTE)
+
+    2. user setup a git-svn repository that is used to push changes to
+       svn: git svn clone -s svn+url (GIT_SVN)
+
+    3. user configures post-receive to something similar to
+       myreplay.sh. It should also defined which branches will be
+       pushed to svn [refer to myreplay.sh for more information];
+
+    4. users push/pull from/to GIT_REMOTE. During the push operation,
+       the post-receive will sync with the GTI_SVN repository and
+       perform a dcommit. Notice the svn is used strictly for backup.
+
+ +-----+      +------+
+ |     | push | git  |
+ | git +------+      |
+ |     |      |master|
+ +-----+      +--+---+
+                 |              +-----+ 1. lock
+                 | on-receive   | git | 2. git pull
+                 +--------------+     | 3. git svn dcommit
+                                | svn | 4. unlock
+                                +-----+
+
+The careful reader might be asking right now what is the value of
+using svn, since it is pretty much read only. Well, in our case the
+company enforces us using svn, and our continuous integration system
+is only able to fetch from SVN. While the later might be fixed, the
+former is harder.
