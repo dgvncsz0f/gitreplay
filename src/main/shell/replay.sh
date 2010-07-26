@@ -54,8 +54,17 @@ function replay_lock
   local lock=/bin/mkdir
   local mutex=${1:-${HOME}/gitreplay_mutex}
   local timeout=3600
-
+  
+  echo -n "[replay_lock] acquiring lock ... "
   ${lock} "${mutex}" 2>/dev/null
+  if [ "${?}" = "0" ]
+  then
+    echo "ok!"
+    return 0
+  else
+    echo "fail!"
+    return 1
+  fi
 }
 
 function replay_check
@@ -70,6 +79,7 @@ function replay_unlock
 {
   local unlock=/bin/rmdir
   local mutex=${1:-${HOME}/gitreplay_mutex}
-
+  
+  echo "[replay_unlock] releasing lock"
   ${unlock} "${mutex}"
 }
