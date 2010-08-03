@@ -28,7 +28,7 @@ function replay_push
   (export GIT_DIR="${loc_root}/.git";
      cd "${loc_root}" && \
      "${git}" checkout ${loc_ref} && \
-     "${git}" pull "file://${rem_root}" ${rem_ref} && \
+     "${git}" pull -s recursive -X theirs "file://${rem_root}" ${rem_ref} && \
      "${git}" svn dcommit)
 }
 
