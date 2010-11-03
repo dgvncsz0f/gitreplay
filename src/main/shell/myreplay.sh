@@ -14,10 +14,12 @@ function myreplay_map
 
   if [ "${ref}" = "refs/heads/master" ]
   then
-    replay_strict replay_push "file:///${remote_root}" ${local_root} "master" "svn/trunk"
+    # replay_strict replay_push "file:///${remote_root}" ${local_root} "master" "svn/trunk"
+    replay_push "file:///${remote_root}" ${local_root} "master" "svn/trunk" || echo "ERROR: could not push to svn. You might need to fix this manually"
   elif [ "${ref}" = "refs/heads/devel" ]
   then
-    replay_strict replay_push "file:///${remote_root}" ${local_root} "devel" "svn/devel"
+    # replay_strict replay_push "file:///${remote_root}" ${local_root} "devel" "svn/devel"
+    replay_push "file:///${remote_root}" ${local_root} "devel" "svn/devel" || echo "ERROR: could not push to svn. You might need to fix this manually"
   fi
 }
 
