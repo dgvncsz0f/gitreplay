@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 git=${gitbin:-/usr/bin/git}
-egrep=${egrepbin:-/bin/egrep}
+hg=${hgbin:-/usr/bin/hg}
 
 # Executes the command with any number of arguments and fail (aborts)
 # if there was any error.
@@ -16,6 +16,22 @@ function replay_strict
   "${prog}" ${@} || exit ${?}
 }
 
+# A callback that is able to commit to svn using git-svn.
+function replay_gitsvn_callback
+{
+  "${git}" svn dcommit
+}
+
+# A callback that is able to commit to hg using default binaries. It
+# assumes that the remote repository and such are configured in .hgrc
+# files.
+function replay_hg_callback
+{
+  "${hg}" addremove
+  "${hg}" commit -m "gitreplay"
+  "${hg}" push
+}
+
 # Pulls changes from the remote git repository and after that perform
 # `svn dcommit'.
 function replay_push
@@ -24,12 +40,13 @@ function replay_push
   local loc_root=${2}
   local rem_ref=${3}
   local loc_ref=${4}
+  local callback=${5}
 
   (export GIT_DIR="${loc_root}/.git";
      cd "${loc_root}" && \
-     "${git}" checkout ${loc_ref} && \
-     "${git}" pull -s recursive -X theirs "file://${rem_root}" ${rem_ref} && \
-     "${git}" svn dcommit)
+        "${git}" checkout ${loc_ref} && \
+        "${git}" pull -s recursive -X theirs "file://${rem_root}" ${rem_ref} && \
+        "${callback}")
 }
 
 # For each change git push produces, invokes a callback with the ref
